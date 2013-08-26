@@ -5,6 +5,9 @@ this is a bug in PHP 5.4. The best way to avoid it is to upgrade to 5.4.11 or hi
 similar than https://github.com/symfony/symfony/issues/5868
 but it works
 
+You also can see the related events emmited by the security component
+User and password is hardcoded in the UserProvide class. You must implement your logic (DB, ...)
+
 ```php
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;

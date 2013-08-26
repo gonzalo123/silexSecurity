@@ -1,4 +1,15 @@
 {
+    "name":"gonzalo123/silexSecurity",
+    "description":"Example of Symfony security component with Silex",
+    "license":"MIT",
+    "keywords":["silex", "security"],
+
+    "authors":[
+        {
+            "name":"Gonzalo Ayuso",
+            "email":"gonzalo123@gmail.com"
+        }
+    ],
     "require":{
         "silex/silex":"1.1.*@dev",
         "symfony/security": "~2.3",
