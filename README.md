@@ -10,6 +10,11 @@ User and password is hardcoded in the UserProvide class. You must implement your
 
 ```php
 use Silex\Application;
+use Silex\Provider\UrlGeneratorServiceProvider;
+use Silex\Provider\SecurityServiceProvider;
+use Silex\Provider\SessionServiceProvider;
+use Silex\Provider\TwigServiceProvider;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\AuthenticationEvents;
 use Symfony\Component\Security\Core\Event\AuthenticationEvent;
@@ -20,10 +25,10 @@ use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 $app = new Application();
 $app['debug'] = true;
 
-$app->register(new Silex\Provider\UrlGeneratorServiceProvider());
-$app->register(new Silex\Provider\SecurityServiceProvider());
-$app->register(new Silex\Provider\SessionServiceProvider());
-$app->register(new Silex\Provider\TwigServiceProvider(), [
+$app->register(new UrlGeneratorServiceProvider());
+$app->register(new SecurityServiceProvider());
+$app->register(new SessionServiceProvider());
+$app->register(new TwigServiceProvider(), [
     'twig.path' => __DIR__ . '/../views',
 ]);
 
@@ -39,19 +44,28 @@ $app['security.firewalls'] = [
             'invalidate_session' => false
         ],
         'users' => $app->share(function () use ($app) {
-            return new UserProvider();
-        }),
+                return new UserProvider();
+            }),
     ],
 ];
 
+$app->on(AuthenticationEvents::AUTHENTICATION_FAILURE, function (AuthenticationEvent $event) {
+});
 
-$app->get("/", function () use ($app)
-{
+$app->on(AuthenticationEvents::AUTHENTICATION_SUCCESS, function (AuthenticationEvent $event) {
+});
+
+$app->on(SecurityEvents::INTERACTIVE_LOGIN, function (InteractiveLoginEvent $event) {
+});
+
+$app->on(SecurityEvents::SWITCH_USER, function (SwitchUserEvent $event) {
+});
+
+$app->get("/", function () use ($app) {
     return $app['twig']->render('home.twig', []);
 });
 
-$app->get("/login", function (Request $request) use ($app)
-{
+$app->get("/login", function (Request $request) use ($app) {
     return $app['twig']->render('login.twig', array(
         'error' => $app['security.last_error']($request),
         'last_username' => $app['session']->get('_security.last_username'),
@@ -61,19 +75,6 @@ $app->get("/login", function (Request $request) use ($app)
 $app->get("/admin", function () use ($app) {
     return $app['twig']->render('secret.twig', []);
 })->bind('admin');
-
-// events that we can use related to security component
-$app['dispatcher']->addListener(AuthenticationEvents::AUTHENTICATION_FAILURE, function (AuthenticationEvent $event) {
-    });
-
-$app['dispatcher']->addListener(AuthenticationEvents::AUTHENTICATION_SUCCESS, function (AuthenticationEvent $event) {
-    });
-
-$app['dispatcher']->addListener(SecurityEvents::INTERACTIVE_LOGIN, function (InteractiveLoginEvent $event) {
-    });
-
-$app['dispatcher']->addListener(SecurityEvents::SWITCH_USER, function (SwitchUserEvent $event) {
-    });
 
 $app->run();
 ```
